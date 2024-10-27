@@ -21,13 +21,19 @@ for ticker, cik in tickers_ciks.items():
         filings_df['Ticker'] = ticker
         filings_df['CIK'] = cik
 
+        # Construct the URL for each filing
+        filings_df['accessionNumber'] = filings_df['accessionNumber'].str.replace("-", "")
+        filings_df['xml_url'] = filings_df.apply(
+            lambda row: f"https://www.sec.gov/Archives/edgar/data/{row['CIK']}/{row['accessionNumber']}/{row['primaryDocument']}",
+            axis=1
+        )
+
         # Append to the combined DataFrame
         combined_df = pd.concat([combined_df, filings_df], ignore_index=True)
     else:
         print(f"CSV file for {ticker} not found at {csv_file_path}")
 
-# Save the combined DataFrame to a new CSV for further processing
-combined_df.to_csv('combined_filings.csv', index=False)
+# Save the combined DataFrame with URLs to a new CSV for further processing
+combined_df.to_csv('combined_filings_with_urls.csv', columns=['Ticker', 'CIK', 'accessionNumber', 'xml_url'], index=False)
 
-print("Combined CIK and filings data saved to 'combined_filings.csv'.")
-
+print("Combined CIK, filings data, and URLs saved to 'combined_filings_with_urls.csv'.")

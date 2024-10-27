@@ -1,38 +1,16 @@
-import pandas as pd
+import requests
 
-# Define the ticker to CIK mapping
-tickers_ciks = {
-    'AAPL': '0000320193',  # Apple
-    'MSFT': '0000789019',  # Microsoft
-    'GOOGL': '0001652044',  # Alphabet
-    'AMZN': '0001018724',  # Amazon
-    'TSLA': '0001318605'  # Tesla
-}
+# URL of the file to download
+url = "https://www.sec.gov/Archives/edgar/data/0000320193/000032019324000116/xslF345X05/wk-form4_1729204211.xml"
 
-# Convert the tickers_ciks dictionary into a DataFrame
-ciks_df = pd.DataFrame(list(tickers_ciks.items()), columns=['Ticker', 'CIK'])
+# Send an HTTP GET request to the URL
+response = requests.get(url)
 
-# Load the Form 4 filings CSV
-try:
-    filings_df = pd.read_csv('edgar_filings/GOOGL_form_4_filings.csv')  # Ensure the file path is correct
-except FileNotFoundError:
-    print("Error: The specified file was not found. Please check the file path.")
-    exit()
-
-# Check if 'CIK' exists in the 'filings_df'
-if 'CIK' not in filings_df.columns:
-    print("Error: The 'CIK' column is missing in the Form 4 filings CSV.")
-    exit()
-
-# Ensure the 'CIK' column in filings_df is string type for the merge to work
-filings_df['CIK'] = filings_df['CIK'].astype(str)
-
-# Merge based on 'CIK'
-combined_df = filings_df.merge(ciks_df, on='CIK', how='left')
-
-# Save the merged DataFrame to a new CSV for further processing
-output_file = 'combined_filings.csv'
-combined_df.to_csv(output_file, index=False)
-
-print(f"Combined CIK and filings data saved to '{output_file}'.")
-
+# Check if the request was successful
+if response.status_code == 200:
+    # Save the content to a file
+    with open("wk-form4_1729204211.xml", "wb") as file:
+        file.write(response.content)
+    print("File downloaded successfully.")
+else:
+    print("Failed to download the file. Status code:", response.status_code)
