@@ -38,7 +38,7 @@ def save_titles_to_csv(titles, output_path="data/youtube_csv/youtube_titles.csv"
     # Save the titles to the specified CSV file path
     with open(output_path, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow(["Title"])  # CSV header
+        writer.writerow(["Youtube"])  # CSV header
         for title in titles:
             writer.writerow([title])
     print(f"Titles saved to {output_path}")
