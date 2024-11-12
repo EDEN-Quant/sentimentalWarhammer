@@ -1,1 +1,1 @@
-AIzaSyAmsrtE349oSwGB4qTfYxGizW__5w4zS4k
+API_Key = AIzaSyAmsrtE349oSwGB4qTfYxGizW__5w4zS4k
