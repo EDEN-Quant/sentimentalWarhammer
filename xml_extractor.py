@@ -1,38 +1,37 @@
+import csv
 import os
 import requests
-import pandas as pd
 
-# Load the combined CSV
-combined_df = pd.read_csv('combined_filings.csv')
+# Define the relative path to the CSV file and the directory to save the XML files
+csv_file_path = 'edgar_filings/combined_filings.csv'
+output_dir = 'edgar_filings/xml_files'
 
-# Create a base folder for storing the XMLs
-base_folder = 'edgar_xmls'
-os.makedirs(base_folder, exist_ok=True)
+# Create the output directory if it doesn't exist
+os.makedirs(output_dir, exist_ok=True)
 
-# Loop through each row, create subfolders for each company, and download the XMLs
-for index, row in combined_df.iterrows():
-    ticker = row['Ticker']
-    cik = row['CIK']
-    accession_number = row['accessionNumber'].replace("-", "")
-    primary_document = row['primaryDocument']  # Get the primary document from the row
+# Function to download and save XML files
+def download_xml_files(csv_file_path, output_dir):
+    headers = {'User-Agent': 'Alexander Kokiauri akokiauri.ieu2022@student.ie.edu'}
+    
+    with open(csv_file_path, mode='r', newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            xml_url = row['xml_url']
+            ticker = row['Ticker']
+            accession_number = row['accessionNumber']
+            
+            # Define the filename and path to save the XML file
+            filename = f"{ticker}_{accession_number}.xml"
+            file_path = os.path.join(output_dir, filename)
+            
+            # Download the XML file
+            response = requests.get(xml_url, headers=headers)
+            if response.status_code == 200:
+                with open(file_path, 'wb') as file:
+                    file.write(response.content)
+                print(f"Downloaded and saved: {filename}")
+            else:
+                print(f"Failed to download: {xml_url}")
 
-    # Construct the XML URL using the CIK, accession number, and primary document
-    xml_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession_number}/{primary_document}"
-
-    # Create a folder for each company
-    company_folder = os.path.join(base_folder, ticker)
-    os.makedirs(company_folder, exist_ok=True)
-
-    # Define the filename for the XML
-    filename = f"{accession_number}.xml"
-    file_path = os.path.join(company_folder, filename)
-
-    # Download the XML file
-    response = requests.get(xml_url, headers={'User-Agent': 'Your-Company-Name Your-Email'})
-    if response.status_code == 200:
-        with open(file_path, 'wb') as file:
-            file.write(response.content)
-        print(f"Saved XML for {ticker} to {file_path}")
-    else:
-        print(f"Failed to download XML for {ticker} from {xml_url}. Status code: {response.status_code}")
-
+# Run the function to download and save XML files
+download_xml_files(csv_file_path, output_dir)

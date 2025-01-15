@@ -2,12 +2,13 @@ import requests
 import pandas as pd
 import os
 from tickers_ciks import tickers_ciks
+from datetime import datetime, timedelta
 
 # Define a function to fetch data from EDGAR for a given ticker's CIK
 def fetch_edgar_data(cik):
     url = f"https://data.sec.gov/submissions/CIK{cik}.json"
     headers = {
-        'User-Agent': 'Your-Company-Name Your-Email'
+        'User-Agent': 'Alexander Kokiauri akokiauri.ieu2022@student.ie.edu'
     }
 
     response = requests.get(url, headers=headers)
@@ -32,8 +33,15 @@ def fetch_edgar_data(cik):
             'primaryDocDescription': filings_data['primaryDocDescription']
         })
 
+        # Convert filingDate to datetime
+        filings_df['filingDate'] = pd.to_datetime(filings_df['filingDate'])
+
+        # Filter for filings in the last 6 months
+        six_months_ago = datetime.now() - timedelta(days=6*30)
+        recent_filings_df = filings_df[filings_df['filingDate'] >= six_months_ago]
+
         # Filter for Form 4 filings only (Insider trades)
-        form_4_filings_df = filings_df[filings_df['form'] == '4']
+        form_4_filings_df = recent_filings_df[recent_filings_df['form'] == '4']
 
         return form_4_filings_df
     else:
@@ -42,7 +50,7 @@ def fetch_edgar_data(cik):
 
 
 # Create a folder to store the CSV files if it doesn't already exist
-output_folder = 'edgar_filings'
+output_folder = os.path.join(os.path.dirname(__file__), 'edgar_filings')
 os.makedirs(output_folder, exist_ok=True)
 
 # Loop through each ticker and fetch the Form 4 filings
