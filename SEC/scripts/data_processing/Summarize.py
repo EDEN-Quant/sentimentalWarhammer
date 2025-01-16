@@ -24,7 +24,7 @@ def fetch_market_caps(tickers):
 # Function to process Form 4 data and generate summary CSV
 def process_form4_data(output_csv):
     base_dir = os.path.dirname(__file__)
-    input_csv = os.path.join(base_dir, 'edgar_filings', 'form4_data.csv')
+    input_csv = os.path.join(base_dir, '..', '..', 'data', 'form4transactions', 'transactions', 'form4_data.csv')
 
     # Fetch market capitalization data for specific companies
     market_caps = fetch_market_caps(tickers_ciks.keys())
@@ -108,4 +108,5 @@ def process_form4_data(output_csv):
     print(f"Done! Created {output_csv} with {len(stats)} rows.")
 
 # Call the function to process data and generate summary
-process_form4_data('sentiment_data.csv')
+output_csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'form4transactions', 'summary', 'summary_data.csv')
+process_form4_data(output_csv_path)

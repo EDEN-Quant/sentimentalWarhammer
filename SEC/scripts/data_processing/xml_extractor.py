@@ -3,8 +3,8 @@ import os
 import requests
 
 # Define the relative path to the CSV file and the directory to save the XML files
-csv_file_path = 'edgar_filings/combined_filings.csv'
-output_dir = 'edgar_filings/xml_files'
+csv_file_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'CSV', 'combined', 'filings.csv')
+output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'XML', 'raw')
 
 # Create the output directory if it doesn't exist
 os.makedirs(output_dir, exist_ok=True)

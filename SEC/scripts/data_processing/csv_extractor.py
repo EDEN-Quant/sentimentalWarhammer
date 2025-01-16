@@ -50,7 +50,7 @@ def fetch_edgar_data(cik):
 
 
 # Create a folder to store the CSV files if it doesn't already exist
-output_folder = os.path.join(os.path.dirname(__file__), 'edgar_filings')
+output_folder = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'CSV', 'raw')
 os.makedirs(output_folder, exist_ok=True)
 
 # Loop through each ticker and fetch the Form 4 filings

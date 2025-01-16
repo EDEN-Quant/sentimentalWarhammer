@@ -3,7 +3,7 @@ import os
 from tickers_ciks import tickers_ciks  # Import the ticker and CIK mapping
 
 # Define the folder containing the CSVs for each ticker
-filings_folder = os.path.join(os.path.dirname(__file__), 'edgar_filings')
+filings_folder = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'CSV', 'raw')
 
 # Create an empty DataFrame to combine all filings
 combined_df = pd.DataFrame()
@@ -33,8 +33,10 @@ for ticker, cik in tickers_ciks.items():
     else:
         print(f"CSV file for {ticker} not found at {csv_file_path}")
 
+# Define the output file path
+output_file_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'CSV', 'combined', 'filings.csv')
+
 # Save the combined DataFrame with URLs to a new CSV for further processing
-output_file_path = os.path.join(filings_folder, 'combined_filings.csv')
 combined_df.to_csv(output_file_path, columns=['Ticker', 'CIK', 'accessionNumber', 'xml_url'], index=False)
 
 print(f"Combined CIK, filings data, and URLs saved to '{output_file_path}'.")

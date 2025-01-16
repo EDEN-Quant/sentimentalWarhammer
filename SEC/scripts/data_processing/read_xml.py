@@ -1,11 +1,12 @@
 import os
 import csv
 from bs4 import BeautifulSoup
+from tickers_ciks import tickers_ciks  # Import tickers_ciks
 
 # Define paths
 base_dir = os.path.dirname(__file__)
-xml_dir = os.path.join(base_dir, 'edgar_filings', 'xml_files')
-output_csv = os.path.join(base_dir, 'edgar_filings', 'form4_data.csv')
+xml_dir = os.path.join(base_dir, '..', '..', 'data', 'XML', 'raw')
+output_csv = os.path.join(base_dir, '..', '..', 'data', 'form4transactions', 'form4_data.csv')
 
 def extract_form4_data(html_file):
     """
@@ -115,12 +116,14 @@ def save_form4_data_to_csv(xml_dir, output_csv):
         
         for xml_file in os.listdir(xml_dir):
             if xml_file.endswith('.xml'):
-                xml_path = os.path.join(xml_dir, xml_file)
-                all_transactions = extract_form4_data(xml_path)
-                if all_transactions:
-                    for tx in all_transactions:
-                        writer.writerow(tx)
-                print(f"Processed {xml_file} with {len(all_transactions)} transaction(s).")
+                # Check if the file starts with any of the symbols in tickers_ciks
+                if any(xml_file.startswith(symbol) for symbol in tickers_ciks.keys()):
+                    xml_path = os.path.join(xml_dir, xml_file)
+                    all_transactions = extract_form4_data(xml_path)
+                    if all_transactions:
+                        for tx in all_transactions:
+                            writer.writerow(tx)
+                    print(f"Processed {xml_file} with {len(all_transactions)} transaction(s).")
 
 # Finally, run the extraction
 if __name__ == '__main__':
