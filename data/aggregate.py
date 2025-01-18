@@ -18,29 +18,31 @@ def aggregate_csv_data(root_dir, output_file):
                 except Exception as e:
                     print(f"Could not read {file_path}: {e}")
 
-    # Initialize an empty DataFrame for aggregation
-    aggregate_df = pd.DataFrame()
+    # Check if we have any data to aggregate
+    if not data_frames:
+        print("No CSV files found to aggregate.")
+        return
     
-    # Concatenate each DataFrame side by side
-    for idx, df in enumerate(data_frames):
-        # Rename columns to avoid conflicts if needed
-        df.columns = [f"{col}" for col in df.columns]
-        
-        # Join the current DataFrame to the aggregate DataFrame
-        aggregate_df = pd.concat([aggregate_df, df], axis=1)
+    # Concatenate all DataFrames side by side
+    try:
+        aggregate_df = pd.concat(data_frames, axis=1)
+    except Exception as e:
+        print(f"Error during concatenation: {e}")
+        return
 
     # Save the aggregated DataFrame to the output file
-    if not aggregate_df.empty:
+    try:
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
         aggregate_df.to_csv(output_file, index=False)
         print(f"Aggregated data saved to {output_file}")
-    else:
-        print("No data to aggregate.")
+    except Exception as e:
+        print(f"Could not save aggregated data: {e}")
 
 if __name__ == "__main__":
     # Root directory where the data subdirectories are stored
-    root_dir = "data"  # Adjust this to the path of your "data" directory
+    root_dir = "C:/Users/sebas/Desktop/ie_dev/IE_Year_3/EDEN/sentimentalWarhammer/data"  # Adjust this to the path of your "data" directory
     
     # Output file for the aggregated data
-    output_file = "output/aggregated_data.csv"  # Change this path if needed
+    output_file = "C:/Users/sebas/Desktop/ie_dev/IE_Year_3/EDEN/sentimentalWarhammer/aggregated_data.csv"
     
     aggregate_csv_data(root_dir, output_file)
