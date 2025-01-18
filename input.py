@@ -94,5 +94,7 @@ def main():
     output_file = os.path.join(base_dir, "aggregated_data.csv")  # Output file path
     aggregate_csv_data(root_dir, output_file)
 
+    #### HERE WILL BE THE CODE TO RUN THE SENTIMENT ANALYSIS AND SEC MODEL ####
+
 if __name__ == "__main__":
     main()
