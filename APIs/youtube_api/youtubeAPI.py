@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     try:
         total_results = 10
-        titles = get_youtube_titles(query, total_results=total_results)
+        titles = get_youtube_titles(query=Nvidia, total_results=total_results)
         save_titles_to_csv(titles, output_path)
     except ValueError as e:
         print(str(e))
