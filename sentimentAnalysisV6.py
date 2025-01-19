@@ -63,36 +63,59 @@ if not os.path.exists(file_path):
     print(f"Error: '{file_path}' not found.")
     exit(1)
 
+# Try to detect encoding
 with open(file_path, 'rb') as f:
     result = chardet.detect(f.read(10000))
     encoding = result['encoding']
 
-# Read the CSV with the detected encoding
-df = pd.read_csv(file_path, encoding=encoding)
+# Read the CSV with the detected encoding, and fallback to common encodings if it fails
+try:
+    df = pd.read_csv(file_path, encoding=encoding)
+    print(f"Successfully read '{file_path}' with encoding '{encoding}'")
+except Exception as e:
+    print(f"Error reading '{file_path}' with detected encoding '{encoding}': {e}")
+    print("Trying with 'utf-8' encoding...")
+    try:
+        df = pd.read_csv(file_path, encoding='utf-8')
+        print(f"Successfully read '{file_path}' with 'utf-8' encoding")
+    except Exception as e:
+        print(f"Error reading '{file_path}' with 'utf-8' encoding: {e}")
+        print("Trying with 'latin1' encoding...")
+        try:
+            df = pd.read_csv(file_path, encoding='latin1')
+            print(f"Successfully read '{file_path}' with 'latin1' encoding")
+        except Exception as e:
+            print(f"Error reading '{file_path}' with 'latin1' encoding: {e}")
+            exit(1)
 
 # --------------------------------------------
 # Read the SEC value from a different CSV file
 # --------------------------------------------
-sec_file_path = os.path.join('..', 'SEC', 'data', 'form4transactions', 'summary', 'summary_data.csv')
+sec_file_path = os.path.join('SEC', 'data', 'form4transactions', 'summary', 'summary_data.csv')
 if not os.path.exists(sec_file_path):
     print(f"Error: '{sec_file_path}' not found.")
     exit(1)
 
-sec_df = pd.read_csv(sec_file_path, encoding=encoding)
-first_company = sec_df.iloc[0]
-sold_percent = first_company['sold_as_percent_market_cap']
-bought_percent = first_company['bought_as_percent_market_cap']
+try:
+    sec_df = pd.read_csv(sec_file_path, encoding=encoding)
+    print(f"Successfully read '{sec_file_path}' with encoding '{encoding}'")
+except Exception as e:
+    print(f"Error reading '{sec_file_path}': {e}")
+    exit(1)
 
-# Scale the SEC value
-SEC = (bought_percent - sold_percent)
+first_company = sec_df.iloc[0]
+insider_sentiment = first_company['sentiment_score']
 
 # --------------------------------------------
 # Run main(...) on each column and store results
 # --------------------------------------------
 results = []
 for col in df.columns:
-    total_count, positive_percentage, negative_percentage, averageScore = main(df, col)
-    results.append((col, total_count, positive_percentage, negative_percentage, averageScore))
+    try:
+        total_count, positive_percentage, negative_percentage, averageScore = main(df, col)
+        results.append((col, total_count, positive_percentage, negative_percentage, averageScore))
+    except Exception as e:
+        print(f"Error processing column '{col}': {e}")
 
 # --------------------------------------------
 # Output the results
@@ -112,5 +135,5 @@ for col, total_count, positive_percentage, negative_percentage, avg_score in res
 google_score = next((res[4] for res in results if res[0] == "GoogleSearch"), 0)
 youtube_score = next((res[4] for res in results if res[0] == "YouTube"), 0)
 
-weighted_average_score = (google_score * 0.5) + (youtube_score * 0.4) + (SEC * 0.1)
+weighted_average_score = (google_score * 0.5) + (youtube_score * 0.4) + (insider_sentiment * 0.1)
 print(f"The weighted average score is {weighted_average_score:.2f}")

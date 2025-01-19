@@ -11,6 +11,6 @@ def delete_files_in_directory(directory):
                 print(f"Failed to delete {file_path}. Reason: {e}")
 
 if __name__ == "__main__":
-    data_directory = os.path.join(os.path.dirname(__file__), 'data')
+    data_directory = os.path.join(os.path.dirname(__file__), 'SEC', 'data')
     delete_files_in_directory(data_directory)
     print("Finished deleting files in the data directory.")
