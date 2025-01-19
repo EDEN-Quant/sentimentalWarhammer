@@ -59,6 +59,6 @@ if __name__ == "__main__":
     # Set the output path to your desired location
     output_path = r"..\sentimentalWarhammer\data\youtube_csv\youtube_titles.csv"
 
-    total_results = 500
+    total_results = 100
     titles = get_youtube_titles(query, total_results=total_results)
     save_titles_to_csv(titles, output_path)

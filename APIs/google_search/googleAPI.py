@@ -49,7 +49,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     query = sys.argv[1]
-    total_results = 100
+    total_results = 10
     output_path = "google_search_results.csv"
 
     titles = get_google_search_titles(query, total_results=total_results)
