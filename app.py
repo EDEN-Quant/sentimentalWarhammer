@@ -3,6 +3,8 @@ import os
 import subprocess
 import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
+
 
 # Add the data_processing directory to the system path
 data_processing_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'SEC', 'scripts', 'data_processing'))
@@ -10,6 +12,9 @@ sys.path.append(data_processing_path)
 
 from tickers_ciks import tickers_ciks
 from csv_extractor import fetch_edgar_data, save_filings_to_csv
+
+# Load environment variables from .env
+load_dotenv()
 
 # Fetch API key, CX, and Base URL from environment variables
 API_KEY = os.environ.get("API_KEY")
@@ -121,6 +126,30 @@ def main():
         if youtube_stderr:
             st.error("Error in YouTube API")
             st.text(youtube_stderr.decode())
+
+        # Run Google Search API script
+        google_script = os.path.join(base_dir, "APIs", "google_search", "googleAPI.py")
+
+        if not os.path.exists(google_script):
+            st.error(f"Error: {google_script} not found.")
+            return
+
+        st.info("Running Google Search API script...")
+        google_process = subprocess.Popen(
+            [python_interpreter, google_script, query],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+
+        google_stdout, google_stderr = google_process.communicate()
+
+        # Display Google API output
+        st.subheader("Google Search API Output")
+        if google_stdout:
+            st.text(google_stdout.decode())
+        if google_stderr:
+            st.error("Error in Google Search API")
+            st.text(google_stderr.decode())
 
         # Aggregate CSV files
         st.info("Aggregating CSV files...")

@@ -40,8 +40,12 @@ def get_google_search_titles(query, max_results=50, total_results=500):
 
 def save_titles_to_csv(titles, output_path):
     # Ensure the output directory exists
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
+    directory = os.path.dirname(output_path)
+    if not directory:  # Handle cases where no directory is specified
+        directory = "data"  # Default directory
+        os.makedirs(directory, exist_ok=True)
+        output_path = os.path.join(directory, output_path)
+
     # Save titles to a CSV file
     with open(output_path, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
@@ -57,7 +61,8 @@ if __name__ == "__main__":
 
     query = sys.argv[1]
     total_results = 10
-    output_path = "google_search_results.csv"
+    output_path = "google_search_results.csv"  # Default output file name
 
+    # Generate the results and save them
     titles = get_google_search_titles(query, total_results=total_results)
     save_titles_to_csv(titles, output_path)
