@@ -145,4 +145,7 @@ def main():
         st.success("Pipeline execution complete.")
 
 if __name__ == "__main__":
-    main()
+    import os
+    port = int(os.environ.get("PORT", 8000))  # Default to port 8000
+    st._is_running_with_streamlit = True
+    st.run(port=port)

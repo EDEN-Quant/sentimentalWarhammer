@@ -4,8 +4,12 @@ import os
 import sys
 import time
 
-API_KEY = 'AIzaSyAmsrtE349oSwGB4qTfYxGizW__5w4zS4k'
-BASE_URL = "https://www.googleapis.com/youtube/v3/search"
+# Fetch API Key and Base URL from environment variables
+API_KEY = os.environ.get("API_KEY")
+BASE_URL = os.environ.get("BASE_URL")
+
+if not API_KEY or not BASE_URL:
+    raise ValueError("Missing API_KEY or BASE_URL environment variables.")
 
 def get_youtube_titles(query, max_results=50, total_results=500, order='viewCount'):
     titles = []

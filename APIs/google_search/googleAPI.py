@@ -3,9 +3,13 @@ import csv
 import os
 import sys
 
-API_KEY = 'AIzaSyAQ4C8k_HyoRG9bZ-n_UaEDtwvUNg6uWnw'
-CX = 'e39b1e4e7db0f4c2c'
+# Fetch API Key and CX from environment variables
+API_KEY = os.environ.get("API_KEY")
+CX = os.environ.get("CX")
 BASE_URL = "https://www.googleapis.com/customsearch/v1"
+
+if not API_KEY or not CX:
+    raise ValueError("Missing API_KEY or CX environment variables.")
 
 def get_google_search_titles(query, max_results=50, total_results=500):
     titles = []
@@ -35,10 +39,13 @@ def get_google_search_titles(query, max_results=50, total_results=500):
     return titles
 
 def save_titles_to_csv(titles, output_path):
+    # Ensure the output directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    # Save titles to a CSV file
     with open(output_path, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow(["GoogleSearch"])
+        writer.writerow(["GoogleSearch"])  # Add a header
         for title in titles:
             writer.writerow([title])
     print(f"Google search titles saved to {output_path}")
