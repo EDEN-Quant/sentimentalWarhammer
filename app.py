@@ -1,3 +1,4 @@
+import sys
 import os
 import subprocess
 import pandas as pd
@@ -119,8 +120,28 @@ def main():
             st.success("Aggregation complete.")
 
         # Perform sentiment analysis
-        sentiment_analysis_script = os.path.join(base_dir, "test", "sentimentAnalysisV6.py")
-        subprocess.run([python_interpreter, sentiment_analysis_script])
+        sentiment_analysis_script = os.path.join(base_dir, "sentimentAnalysisV6.py")
+
+        if not os.path.exists(sentiment_analysis_script):
+            st.error(f"Error: {sentiment_analysis_script} not found.")
+            return
+
+        st.info("Performing sentiment analysis...")
+        result = subprocess.run(
+            [python_interpreter, sentiment_analysis_script],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True  # Ensure the output is captured as a string
+        )
+
+        # Display the output of the sentiment analysis
+        if result.stdout:
+            st.subheader("Sentiment Analysis Output")
+            st.text(result.stdout)
+        # if result.stderr:
+        #     st.error("Error in Sentiment Analysis")
+        #     st.text(result.stderr)
+
         st.success("Pipeline execution complete.")
 
 if __name__ == "__main__":
