@@ -1,12 +1,13 @@
 import os
 import csv
+import sys
 from bs4 import BeautifulSoup
 from tickers_ciks import tickers_ciks  # Import tickers_ciks
 
 # Define paths
 base_dir = os.path.dirname(__file__)
 xml_dir = os.path.join(base_dir, '..', '..', 'data', 'XML', 'raw')
-output_csv = os.path.join(base_dir, '..', '..', 'data', 'form4transactions', 'form4_data.csv')
+output_csv = os.path.join(base_dir, '..', '..', 'data', 'form4transactions', 'transactions', 'form4_data.csv')
 
 def extract_form4_data(html_file):
     """
@@ -94,7 +95,7 @@ def extract_form4_data(html_file):
                         transactions.append(row_data)
     return transactions
 
-def save_form4_data_to_csv(xml_dir, output_csv):
+def save_form4_data_to_csv(xml_dir, output_csv, ticker):
     """
     Reads all .xml from xml_dir, extracts the relevant columns, and writes them to CSV.
     """
@@ -115,16 +116,19 @@ def save_form4_data_to_csv(xml_dir, output_csv):
         writer.writeheader()
         
         for xml_file in os.listdir(xml_dir):
-            if xml_file.endswith('.xml'):
-                # Check if the file starts with any of the symbols in tickers_ciks
-                if any(xml_file.startswith(symbol) for symbol in tickers_ciks.keys()):
-                    xml_path = os.path.join(xml_dir, xml_file)
-                    all_transactions = extract_form4_data(xml_path)
-                    if all_transactions:
-                        for tx in all_transactions:
-                            writer.writerow(tx)
-                    print(f"Processed {xml_file} with {len(all_transactions)} transaction(s).")
+            if xml_file.endswith('.xml') and xml_file.startswith(ticker):
+                xml_path = os.path.join(xml_dir, xml_file)
+                all_transactions = extract_form4_data(xml_path)
+                if all_transactions:
+                    for tx in all_transactions:
+                        writer.writerow(tx)
+                print(f"Processed {xml_file} with {len(all_transactions)} transaction(s).")
 
 # Finally, run the extraction
 if __name__ == '__main__':
-    save_form4_data_to_csv(xml_dir, output_csv)
+    if len(sys.argv) != 2:
+        print("Usage: python read_xml.py <ticker>")
+        sys.exit(1)
+
+    ticker = sys.argv[1]
+    save_form4_data_to_csv(xml_dir, output_csv, ticker)

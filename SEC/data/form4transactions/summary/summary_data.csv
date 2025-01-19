@@ -1,7 +1,2 @@
-company_name,total_value_sold_last_6m,total_value_bought_last_6m,sold_as_percent_market_cap,bought_as_percent_market_cap
-AAPL,318907477.34,0.0,0.0092691624,0.0
-AMZN,3414403314.13,0.0,0.146619132,0.0
-BBW,75436909.84,0.0,14.6283740186,0.0
-GOOGL,130697215.92,0.0,0.005493958,0.0
-MSFT,473776194.47,0.0,0.014936116,0.0
-TSLA,348810106.08,14357217.61,0.026232812,0.0010797571
+company_name,total_value_sold_last_6m,total_value_bought_last_6m,sold_as_percent_market_cap,bought_as_percent_market_cap,sentiment_score
+BBW,75936351.18,0.0,14.4503029357,0.0,-0.5931868086

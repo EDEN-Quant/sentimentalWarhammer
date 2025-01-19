@@ -48,19 +48,21 @@ def fetch_edgar_data(cik):
         print(f"Failed to fetch data for CIK {cik}. Status code: {response.status_code}")
         return pd.DataFrame()  # Return empty DataFrame on failure
 
+def save_filings_to_csv(stock_symbol, form_4_df):
+    # Create a folder to store the CSV files if it doesn't already exist
+    output_folder = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'CSV', 'raw')
+    os.makedirs(output_folder, exist_ok=True)
 
-# Create a folder to store the CSV files if it doesn't already exist
-output_folder = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'CSV', 'raw')
-os.makedirs(output_folder, exist_ok=True)
+    # Save the DataFrame to a CSV file named after the stock symbol
+    csv_file_path = os.path.join(output_folder, f"{stock_symbol}_form_4_filings.csv")
+    form_4_df.to_csv(csv_file_path, index=False)
+    print(f"Saved filings for {stock_symbol} to {csv_file_path}")
 
-# Loop through each ticker and fetch the Form 4 filings
-for ticker, cik in tickers_ciks.items():
-    form_4_df = fetch_edgar_data(cik)
+# # Loop through each ticker and fetch the Form 4 filings
+# for ticker, cik in tickers_ciks.items():
+#     form_4_df = fetch_edgar_data(cik)
 
-    if not form_4_df.empty:
-        # Save the DataFrame to a CSV file named after the ticker
-        csv_file_path = os.path.join(output_folder, f"{ticker}_form_4_filings.csv")
-        form_4_df.to_csv(csv_file_path, index=False)
-        print(f"Saved filings for {ticker} to {csv_file_path}")
-    else:
-        print(f"No filings found for {ticker}")
+#     if not form_4_df.empty:
+#         save_filings_to_csv(ticker, form_4_df)
+#     else:
+#         print(f"No filings found for {ticker}")
