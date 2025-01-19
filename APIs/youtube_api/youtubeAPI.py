@@ -6,12 +6,15 @@ import time
 
 # Fetch API Key and Base URL from environment variables
 API_KEY = os.environ.get("API_KEY")
-BASE_URL = os.environ.get("BASE_URL")
+BASE_URL = os.environ.get("BASE_URL", "https://www.googleapis.com/youtube/v3/search")
 
-if not API_KEY or not BASE_URL:
-    raise ValueError("Missing API_KEY or BASE_URL environment variables.")
+if not API_KEY:
+    raise ValueError("Missing API_KEY environment variable.")
 
 def get_youtube_titles(query, max_results=50, total_results=500, order='viewCount'):
+    if not query.strip():
+        raise ValueError("The query cannot be empty.")
+
     titles = []
     next_page_token = None
 
@@ -22,6 +25,7 @@ def get_youtube_titles(query, max_results=50, total_results=500, order='viewCoun
             'maxResults': min(max_results, total_results - len(titles)),
             'type': 'video',
             'key': API_KEY,
+            'order': order,
             'pageToken': next_page_token,
         }
 
@@ -33,8 +37,7 @@ def get_youtube_titles(query, max_results=50, total_results=500, order='viewCoun
             if not next_page_token:
                 break
         else:
-            print(f"Error: {response.status_code}, {response.text}")
-            break
+            raise ValueError(f"YouTube API Error: {response.status_code} - {response.text}")
 
         time.sleep(1)
 
@@ -61,8 +64,11 @@ if __name__ == "__main__":
 
     query = sys.argv[1]
     # Set the output path to your desired location
-    output_path = r"..\sentimentalWarhammer\data\youtube_csv\youtube_titles.csv"
+    output_path = os.path.join("..", "sentimentalWarhammer", "data", "youtube_csv", "youtube_titles.csv")
 
-    total_results = 10
-    titles = get_youtube_titles(query, total_results=total_results)
-    save_titles_to_csv(titles, output_path)
+    try:
+        total_results = 10
+        titles = get_youtube_titles(query, total_results=total_results)
+        save_titles_to_csv(titles, output_path)
+    except ValueError as e:
+        print(str(e))
