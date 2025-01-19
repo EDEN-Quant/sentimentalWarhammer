@@ -62,7 +62,7 @@ if __name__ == "__main__":
         print("Usage: python youtubeAPI.py <query>")
         sys.exit(1)
 
-    query = "Nvidia"
+    query = sys.argv[1]
     # Set the output path to your desired location
     output_path = os.path.join("..", "sentimentalWarhammer", "data", "youtube_csv", "youtube_titles.csv")
 
