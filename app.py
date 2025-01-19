@@ -11,6 +11,14 @@ sys.path.append(data_processing_path)
 from tickers_ciks import tickers_ciks
 from csv_extractor import fetch_edgar_data, save_filings_to_csv
 
+# Fetch API key, CX, and Base URL from environment variables
+API_KEY = os.environ.get("API_KEY")
+CX = os.environ.get("CX")
+BASE_URL = os.environ.get("BASE_URL", "https://www.googleapis.com/customsearch/v1")  # Default BASE_URL if not provided
+
+if not API_KEY or not CX:
+    raise ValueError("Missing API_KEY or CX environment variables.")
+
 def aggregate_csv_data(root_dir, output_file):
     # List to store each CSV file's data
     data_frames = []
@@ -97,6 +105,7 @@ def main():
             st.error(f"Error: {youtube_script} not found.")
             return
 
+        st.info("Running YouTube API script...")
         youtube_process = subprocess.Popen(
             [python_interpreter, youtube_script, query],
             stdout=subprocess.PIPE,
@@ -107,9 +116,11 @@ def main():
 
         # Display YouTube API output
         st.subheader("YouTube API Output")
-        st.text(youtube_stdout.decode())
+        if youtube_stdout:
+            st.text(youtube_stdout.decode())
         if youtube_stderr:
-            st.error(youtube_stderr.decode())
+            st.error("Error in YouTube API")
+            st.text(youtube_stderr.decode())
 
         # Aggregate CSV files
         st.info("Aggregating CSV files...")
@@ -138,9 +149,9 @@ def main():
         if result.stdout:
             st.subheader("Sentiment Analysis Output")
             st.text(result.stdout)
-        # if result.stderr:
-        #     st.error("Error in Sentiment Analysis")
-        #     st.text(result.stderr)
+        if result.stderr:
+            st.error("Error in Sentiment Analysis")
+            st.text(result.stderr)
 
         st.success("Pipeline execution complete.")
 
