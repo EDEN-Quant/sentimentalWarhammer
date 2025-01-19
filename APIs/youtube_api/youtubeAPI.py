@@ -62,13 +62,13 @@ if __name__ == "__main__":
         print("Usage: python youtubeAPI.py <query>")
         sys.exit(1)
 
-    query = sys.argv[1]
+    query = "Nvidia"
     # Set the output path to your desired location
     output_path = os.path.join("..", "sentimentalWarhammer", "data", "youtube_csv", "youtube_titles.csv")
 
     try:
         total_results = 10
-        titles = get_youtube_titles(query=Nvidia, total_results=total_results)
+        titles = get_youtube_titles(query, total_results=total_results)
         save_titles_to_csv(titles, output_path)
     except ValueError as e:
         print(str(e))
