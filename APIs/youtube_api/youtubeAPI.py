@@ -72,7 +72,7 @@ if __name__ == "__main__":
     output_path = os.path.join("..", "sentimentalWarhammer", "data", "youtube_csv", "youtube_titles.csv")
 
     try:
-        total_results = 10
+        total_results = 20
         titles = get_youtube_titles(query, total_results=total_results)
         save_titles_to_csv(titles, output_path)
     except ValueError as e:
