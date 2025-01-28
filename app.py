@@ -14,7 +14,7 @@ from tickers_ciks import tickers_ciks
 from csv_extractor import fetch_edgar_data, save_filings_to_csv
 
 # Load environment variables from .env
-load_dotenv()
+# load_dotenv()
 
 # Fetch API key, CX, and Base URL from environment variables
 API_KEY = os.environ.get("API_KEY")

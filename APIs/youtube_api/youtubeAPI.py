@@ -15,14 +15,17 @@ def get_youtube_titles(query, max_results=50, total_results=500, order='viewCoun
     if not query.strip():
         raise ValueError("The query cannot be empty.")
 
+    if max_results < 1 or max_results > 50:
+        raise ValueError("maxResults must be between 1 and 50.")
+
     titles = []
     next_page_token = None
 
     while len(titles) < total_results:
         params = {
-            'part': 'snippet',
+            'part': 'snippet',  # Ensure 'snippet' is the value here
             'q': query,
-            'maxResults': min(max_results, total_results - len(titles)),
+            'maxResults': min(max_results, 50),  # maxResults cannot exceed 50
             'type': 'video',
             'key': API_KEY,
             'order': order,
@@ -30,6 +33,7 @@ def get_youtube_titles(query, max_results=50, total_results=500, order='viewCoun
         }
 
         response = requests.get(BASE_URL, params=params)
+
         if response.status_code == 200:
             data = response.json()
             titles.extend([item['snippet']['title'] for item in data.get('items', [])])
@@ -39,9 +43,10 @@ def get_youtube_titles(query, max_results=50, total_results=500, order='viewCoun
         else:
             raise ValueError(f"YouTube API Error: {response.status_code} - {response.text}")
 
-        time.sleep(1)
+        time.sleep(1)  # Avoid hitting the API rate limit
 
     return titles
+
 
 def save_titles_to_csv(titles, output_path):
     # Ensure the output directory exists
