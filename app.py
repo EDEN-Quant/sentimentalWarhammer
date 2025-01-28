@@ -111,8 +111,15 @@ def main():
             return
 
         st.info("Running YouTube API script...")
+        # youtube_process = subprocess.Popen(
+        #     [python_interpreter, youtube_script, query],
+        #     stdout=subprocess.PIPE,
+        #     stderr=subprocess.PIPE
+        # )
+        total_results = 50  # Change this based on user input or requirements
+
         youtube_process = subprocess.Popen(
-            [python_interpreter, youtube_script, query],
+            [python_interpreter, youtube_script, query, str(total_results)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
