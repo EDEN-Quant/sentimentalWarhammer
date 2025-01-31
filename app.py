@@ -17,11 +17,11 @@ from csv_extractor import fetch_edgar_data, save_filings_to_csv
 load_dotenv()
 
 # Fetch API key, CX, and Base URL from environment variables
-API_KEY = os.environ.get("API_KEY")
+GOOGLE_SEARCH_API_KEY = os.environ.get("GOOGLE_SEARCH_API_KEY")
 CX = os.environ.get("CX")
 BASE_URL = os.environ.get("BASE_URL", "https://www.googleapis.com/customsearch/v1")  # Default BASE_URL if not provided
 
-if not API_KEY or not CX:
+if not GOOGLE_SEARCH_API_KEY or not CX:
     raise ValueError("Missing API_KEY or CX environment variables.")
 
 def aggregate_csv_data(root_dir, output_file):
