@@ -2,15 +2,19 @@ import requests
 import csv
 import os
 import sys
+import streamlit as st
 
-# 🔹 Fetch API Key and CX from environment variables
-API_KEY = os.environ.get("API_KEY")
-CX = os.environ.get("CX")
+# 🔹 Fetch API Key and CX from environment variables or Streamlit secrets
+# GOOGLE_SEARCH_API_KEY = os.environ.get("GOOGLE_SEARCH_API_KEY") or st.secrets["GOOGLE_SEARCH_API_KEY"]
+# CX = os.environ.get("GOOGLE_CX") or st.secrets["GOOGLE_CX"]
+
+GOOGLE_SEARCH_API_KEY="AIzaSyBcrDF7ETLbK1kYDG2xz1h1vzdp0r2ioQk"
+CX= "e39b1e4e7db0f4c2c"
 BASE_URL = "https://www.googleapis.com/customsearch/v1"
 
-# 🔹 Ensure API Key is available
-if not API_KEY or not CX:
-    raise ValueError("Missing API_KEY or CX environment variables.")
+# 🔹 Ensure API Key and CX are available
+if not GOOGLE_SEARCH_API_KEY or not CX:
+    raise ValueError("Missing GOOGLE_SEARCH_API_KEY or GOOGLE_CX environment variables.")
 
 # 🔹 Define the correct output path
 if "STREAMLIT_SERVER" in os.environ:  # Detect if running on Streamlit Cloud
@@ -26,10 +30,10 @@ def get_google_search_titles(query, total_results=100):
     start_index = 1  # Pagination starts at 1
 
     while len(titles) < total_results:
-        fetch_count = min(10, total_results - len(titles))  # Max 10 per request
+        fetch_count = min(10, total_results - len(titles))  # Google API max per request
 
         params = {
-            "key": API_KEY,
+            "key": GOOGLE_SEARCH_API_KEY,
             "cx": CX,
             "q": query,
             "start": start_index,  # Pagination index
