@@ -185,9 +185,9 @@ def main():
         if result.stdout:
             st.subheader("Sentiment Analysis Output")
             st.text(result.stdout)
-        if result.stderr:
-            st.error("Error in Sentiment Analysis")
-            st.text(result.stderr)
+        # if result.stderr:
+        #     st.error("Error in Sentiment Analysis")
+        #     st.text(result.stderr)
 
         st.success("Pipeline execution complete.")
 
