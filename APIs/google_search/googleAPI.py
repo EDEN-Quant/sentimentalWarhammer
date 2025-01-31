@@ -82,7 +82,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     query = sys.argv[1]
-    total_results = 300  # Default to fetching 100 results
+    total_results = 100  # Default to fetching 100 results
 
     # Fetch Google search titles and save them to the correct path
     titles = get_google_search_titles(query, total_results=total_results)
