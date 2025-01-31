@@ -7,7 +7,6 @@ import streamlit as st
 # 🔹 Fetch API Key and CX from environment variables or Streamlit secrets
 GOOGLE_SEARCH_API_KEY = os.environ.get("GOOGLE_SEARCH_API_KEY") or st.secrets["GOOGLE_SEARCH_API_KEY"]
 CX = os.environ.get("GOOGLE_CX") or st.secrets["GOOGLE_CX"]
-
 BASE_URL = "https://www.googleapis.com/customsearch/v1"
 
 # 🔹 Ensure API Key and CX are available
