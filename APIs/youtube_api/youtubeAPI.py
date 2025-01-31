@@ -5,11 +5,11 @@ import sys
 import streamlit as st
 
 # 🔹 Fetch API Key from environment variables
-API_KEY = os.environ.get("API_KEY") or st.secrets["API_KEY"]
+YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY") or st.secrets["YOUTUBE_API_KEY"]
 BASE_URL = "https://www.googleapis.com/youtube/v3/search"
 
 # 🔹 Ensure API Key is available
-if not API_KEY:
+if not YOUTUBE_API_KEY:
     raise ValueError("Missing API_KEY environment variable.")
 
 # 🔹 Define the correct output path
@@ -33,7 +33,7 @@ def get_youtube_titles(query, max_results=50, total_results=500, order="relevanc
             "q": query,
             "maxResults": fetch_count,
             "type": "video",
-            "key": API_KEY,
+            "key": YOUTUBE_API_KEY,
             "order": order,
             "pageToken": next_page_token,
         }
