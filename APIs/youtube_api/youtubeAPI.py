@@ -78,7 +78,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     query = sys.argv[1]
-    total_results = 5  # Default to fetching 5 results
+    total_results = 300  # Default to fetching 5 results
 
     # Fetch YouTube titles and save them to the correct path
     titles = get_youtube_titles(query, total_results=total_results)
