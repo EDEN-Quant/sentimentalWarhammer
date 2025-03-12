@@ -13,5 +13,5 @@ st.markdown('''
         ''')
 
 
-st.sidebar.title("Navigate through the different pages")
+st.sidebar.title("Submit Suggestions in the Support Page")
 
