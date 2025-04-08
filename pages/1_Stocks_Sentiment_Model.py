@@ -5,6 +5,7 @@ import pandas as pd
 import streamlit as st
 import time
 from dotenv import load_dotenv
+from sentimentAnalysisV6 import main as sentiment_analysis
 
 # Add the SEC scripts directory to the system path
 data_processing_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'SEC', 'scripts', 'data_processing'))
@@ -12,6 +13,12 @@ sys.path.append(data_processing_path)
 
 from tickers_ciks import tickers_ciks
 from csv_extractor import fetch_edgar_data, save_filings_to_csv
+
+# Import the sentiment analysis module
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import sentiment_analysis_module as sam
 
 # Fetch API key, CX, and Base URL from environment variables
 if 'GOOGLE_SEARCH_API_KEY' not in os.environ or 'YOUTUBE_API_KEY' not in os.environ or 'CX' not in os.environ:
@@ -58,7 +65,7 @@ def aggregate_csv_data(root_dir, output_file, progress_bar):
         return None
 
 def main():
-    st.title("Stock Data Aggregation & Sentiment Analysis: Pipeline 4")
+    st.title("Stock Data Aggregation & Sentiment Analysis: Pipeline 5")
 
     # Sidebar Inputs
     st.sidebar.title("Pipeline Execution")
@@ -178,95 +185,137 @@ def main():
         st.sidebar.info("Performing sentiment analysis...")
         sentiment_progress = st.sidebar.progress(0)
 
-        sentiment_analysis_script = os.path.join(base_dir, "sentimentAnalysisV6.py")
-        if not os.path.exists(sentiment_analysis_script):
-            st.sidebar.error(f"Error: {sentiment_analysis_script} not found.")
-            return
-
-        update_progress(sentiment_progress, 0, 50)
-        result = subprocess.run(
-            [python_interpreter, sentiment_analysis_script],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        update_progress(sentiment_progress, 50, 100)
+        # Set up the file paths for sentiment analysis
+        aggregated_data_path = os.path.join(base_dir, "aggregated_data.csv")
+        sec_data_path = os.path.join(base_dir, "SEC", "data", "form4transactions", "summary", "summary_data.csv")
         
-        st.subheader("Sentiment Analysis Results")
-        st.text(result.stdout)
+        # Check if files exist
+        if not os.path.exists(aggregated_data_path):
+            st.sidebar.error(f"Error: '{aggregated_data_path}' not found.")
+            return
+        
+        # Run sentiment analysis directly using the module
+        update_progress(sentiment_progress, 0, 50)
+        
+        # Use a try/except block to catch any errors
+        try:
+            with st.spinner("Running sentiment analysis..."):
+                analysis_results, weighted_score, error = sam.run_sentiment_analysis(
+                    aggregated_data_path, 
+                    sec_data_path
+                )
             
-            # # # Parse the sentiment analysis results
-            # # lines = result.stdout.strip().split('\n')
-            # # results = []
-            # # current_column = None
-            # # current_data = {}
-            
-            # # # Regular extraction of results from text output
-            # # for line in lines:
-            # #     if line.startswith("Column:"):
-            # #         if current_column and current_data:
-            # #             results.append((current_column, current_data))
-            # #             current_data = {}
-            # #         current_column = line.replace("Column:", "").strip()
-            # #     elif "Processed " in line and "entries" in line:
-            # #         current_data["total"] = int(line.split("Processed ")[1].split(" entries")[0])
-            # #     elif "% were positive" in line:
-            # #         current_data["positive"] = float(line.split("%")[0].strip())
-            # #     elif "% were negative" in line:
-            # #         current_data["negative"] = float(line.split("%")[0].strip())
-            # #     elif "average score" in line.lower():
-            # #         current_data["avg_score"] = float(line.split("was ")[1].strip())
-            # #     elif "weighted average score" in line.lower():
-            # #         weighted_score = float(line.split("is ")[1].strip())
-            
-            # # Add the last column data
-            # if current_column and current_data:
-            #     results.append((current_column, current_data))
-            
-            # # Display results in a nice layout
-            # if results:
-            #     tabs = st.tabs([res[0] for res in results] + ["Combined Score"])
+            if error:
+                st.sidebar.error(f"Error during sentiment analysis: {error}")
+                return
                 
-            #     for i, (column, data) in enumerate(results):
-            #         with tabs[i]:
-            #             col1, col2, col3, col4 = st.columns(4)
-            #             with col1:
-            #                 st.metric("Total Entries", f"{data.get('total', 0)}")
-            #             with col2:
-            #                 st.metric("Positive %", f"{data.get('positive', 0):.2f}%")
-            #             with col3:
-            #                 st.metric("Negative %", f"{data.get('negative', 0):.2f}%")
-            #             with col4:
-            #                 st.metric("Average Score", f"{data.get('avg_score', 0):.2f}")
+            update_progress(sentiment_progress, 50, 100)
+            
+            # Display the results
+            st.subheader("Sentiment Analysis Results")
+            
+            # For backward compatibility - debugging
+            with st.expander("Raw Data (for debugging)"):
+                st.json([{
+                    'column': res['column'],
+                    'total_count': res['total_count'],
+                    'positive_percentage': res['positive_percentage'],
+                    'negative_percentage': res['negative_percentage'],
+                    'avg_score': res['avg_score']
+                } for res in analysis_results])
+            
+            # Display results in a nice layout
+            if analysis_results:
+                # Create tabs for each column plus the combined score
+                tab_labels = [res['column'] for res in analysis_results]
+                tab_labels.append("Combined Score")
+                tabs = st.tabs(tab_labels)
                 
-            #     # Display the combined weighted average
-            #     with tabs[-1]:
-            #         st.metric("Weighted Average Score", f"{weighted_score:.2f}")
+                # Display individual column results
+                for i, result_data in enumerate(analysis_results):
+                    with tabs[i]:
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.metric("Total Entries", f"{result_data['total_count']}")
+                        with col2:
+                            st.metric("Positive %", f"{result_data['positive_percentage']:.2f}%")
+                        with col3:
+                            st.metric("Negative %", f"{result_data['negative_percentage']:.2f}%")
+                        with col4:
+                            st.metric("Average Score", f"{result_data['avg_score']:.2f}")
+                        
+                        # Create a histogram of the sentiment distribution if we have detailed data
+                        if 'detailed_df' in result_data and not result_data['detailed_df'].empty:
+                            try:
+                                import plotly.express as px
+                                fig = px.histogram(
+                                    result_data['detailed_df'], 
+                                    x='adjustedScore',
+                                    title=f"Sentiment Distribution for {result_data['column']}",
+                                    labels={'adjustedScore': 'Sentiment Score (-1 to 1)'},
+                                    nbins=20
+                                )
+                                fig.update_layout(yaxis_title="Count", bargap=0.1)
+                                st.plotly_chart(fig, use_container_width=True)
+                            except Exception as e:
+                                st.warning(f"Could not display histogram: {e}")
+                
+                # Display the combined weighted average
+                with tabs[-1]:
+                    st.metric("Weighted Average Score", f"{weighted_score:.2f}")
                     
-            #         # Interpret the score
-            #         if weighted_score > 0.5:
-            #             sentiment = "Very Positive"
-            #             color = "green"
-            #         elif weighted_score > 0.2:
-            #             sentiment = "Positive"
-            #             color = "lightgreen"
-            #         elif weighted_score > -0.2:
-            #             sentiment = "Neutral"
-            #             color = "gray"
-            #         elif weighted_score > -0.5:
-            #             sentiment = "Negative"
-            #             color = "orange"
-            #         else:
-            #             sentiment = "Very Negative"
-            #             color = "red"
+                    # Interpret the score
+                    if weighted_score > 0.5:
+                        sentiment = "Very Positive"
+                        color = "green"
+                    elif weighted_score > 0.2:
+                        sentiment = "Positive"
+                        color = "lightgreen"
+                    elif weighted_score > -0.2:
+                        sentiment = "Neutral"
+                        color = "gray"
+                    elif weighted_score > -0.5:
+                        sentiment = "Negative"
+                        color = "orange"
+                    else:
+                        sentiment = "Very Negative"
+                        color = "red"
                     
-            #         st.markdown(f"<h3 style='color: {color}'>Overall Sentiment: {sentiment}</h3>", unsafe_allow_html=True)
+                    st.markdown(f"<h3 style='color: {color}'>Overall Sentiment: {sentiment}</h3>", unsafe_allow_html=True)
                     
-            #         st.info("For a more detailed analysis with charts and customizable weights, please visit the 'Combined Analysis' page.")
-            # else:
-            #     st.warning("Could not parse sentiment analysis results properly.")
-            #     st.text(result.stdout)
-
+                    # Calculate component contributions
+                    google_result = next((res for res in analysis_results if res['column'] == "GoogleSearch"), None)
+                    youtube_result = next((res for res in analysis_results if res['column'] == "YouTube"), None)
+                    
+                    google_score = google_result['avg_score'] if google_result else 0
+                    youtube_score = youtube_result['avg_score'] if youtube_result else 0
+                    
+                    st.write("### Score Components")
+                    st.write("The weighted score is calculated with:")
+                    st.write(f"- GoogleSearch: {google_score:.2f} × 0.50 = {google_score * 0.5:.2f}")
+                    st.write(f"- YouTube: {youtube_score:.2f} × 0.40 = {youtube_score * 0.4:.2f}")
+                    
+                    # Get SEC data
+                    insider_sentiment = 0
+                    if os.path.exists(sec_data_path):
+                        try:
+                            sec_df, _ = sam.load_data_with_failover(sec_data_path)
+                            first_company = sec_df.iloc[0]
+                            insider_sentiment = first_company['sentiment_score']
+                        except Exception:
+                            pass
+                            
+                    st.write(f"- SEC Insider: {insider_sentiment:.2f} × 0.10 = {insider_sentiment * 0.1:.2f}")
+                    st.write(f"**Final Score: {weighted_score:.2f}**")
+                    
+                    st.info("For a more detailed analysis with charts and customizable weights, please visit the 'Combined Analysis' page.")
+            else:
+                st.warning("No results were returned from the sentiment analysis.")
+                
+        except Exception as e:
+            st.error(f"An error occurred during sentiment analysis: {e}")
+            update_progress(sentiment_progress, 100, 100)
+        
         st.sidebar.success("Pipeline execution complete!")
 
 if __name__ == "__main__":
