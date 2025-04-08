@@ -2,6 +2,7 @@ from transformers import pipeline
 import pandas as pd
 import chardet
 import os
+import streamlit as st
 
 # Initialize the sentiment pipeline
 sentiment_pipeline = pipeline("sentiment-analysis", batch_size=32)
