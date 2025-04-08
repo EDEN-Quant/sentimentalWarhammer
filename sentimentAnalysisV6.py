@@ -71,21 +71,21 @@ with open(file_path, 'rb') as f:
 # Read the CSV with the detected encoding, and fallback to common encodings if it fails
 try:
     df = pd.read_csv(file_path, encoding=encoding)
-    print(f"Successfully read '{file_path}' with encoding '{encoding}'")
+    # print(f"Successfully read '{file_path}' with encoding '{encoding}'")
 except Exception as e:
-    print(f"Error reading '{file_path}' with detected encoding '{encoding}': {e}")
-    print("Trying with 'utf-8' encoding...")
+    # print(f"Error reading '{file_path}' with detected encoding '{encoding}': {e}")
+    # print("Trying with 'utf-8' encoding...")
     try:
         df = pd.read_csv(file_path, encoding='utf-8')
-        print(f"Successfully read '{file_path}' with 'utf-8' encoding")
+        # print(f"Successfully read '{file_path}' with 'utf-8' encoding")
     except Exception as e:
-        print(f"Error reading '{file_path}' with 'utf-8' encoding: {e}")
-        print("Trying with 'latin1' encoding...")
+        # print(f"Error reading '{file_path}' with 'utf-8' encoding: {e}")
+        # print("Trying with 'latin1' encoding...")
         try:
             df = pd.read_csv(file_path, encoding='latin1')
-            print(f"Successfully read '{file_path}' with 'latin1' encoding")
+            # print(f"Successfully read '{file_path}' with 'latin1' encoding")
         except Exception as e:
-            print(f"Error reading '{file_path}' with 'latin1' encoding: {e}")
+            # print(f"Error reading '{file_path}' with 'latin1' encoding: {e}")
             exit(1)
 
 # --------------------------------------------
@@ -98,7 +98,7 @@ if not os.path.exists(sec_file_path):
 
 try:
     sec_df = pd.read_csv(sec_file_path, encoding=encoding)
-    print(f"Successfully read '{sec_file_path}' with encoding '{encoding}'")
+    # print(f"Successfully read '{sec_file_path}' with encoding '{encoding}'")
 except Exception as e:
     print(f"Error reading '{sec_file_path}': {e}")
     exit(1)

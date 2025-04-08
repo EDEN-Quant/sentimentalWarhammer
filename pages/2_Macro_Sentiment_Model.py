@@ -54,7 +54,7 @@ def aggregate_csv_data(root_dir, output_file, progress_bar):
         return None
 
 def main():
-    st.title("Stock Data Aggregation & Sentiment Analysis")
+    st.title("Macroeconomic Data Aggregation & Sentiment Analysis")
 
     # Sidebar Inputs
     st.sidebar.title("Pipeline Execution")
