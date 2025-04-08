@@ -131,8 +131,8 @@ def main():
         if youtube_stdout:
             st.sidebar.text(youtube_stdout.decode())
         if youtube_stderr:
-            st.sidebar.error("Seems we have run out of requests for the YouTube API: Please try again later.")
-            # st.sidebar.text(youtube_stderr.decode())
+            st.sidebar.error("Error in YouTube API")
+            st.sidebar.text(youtube_stderr.decode())
 
         ### **Google Search API Processing**
         st.sidebar.info("Running Google Search API script...")
@@ -157,8 +157,8 @@ def main():
         if google_stdout:
             st.sidebar.text(google_stdout.decode())
         if google_stderr:
-            st.sidebar.error("Seems we have run out of requests for the Google Search API: Please try again later.")
-            # st.sidebar.text(google_stderr.decode())
+            st.sidebar.error("Error in Google Search API")
+            st.sidebar.text(google_stderr.decode())
 
         ### **CSV Aggregation**
         st.sidebar.info("Aggregating CSV files...")
@@ -193,8 +193,79 @@ def main():
         update_progress(sentiment_progress, 50, 100)
         
         if result.stdout:
-            st.text("Sentiment Analysis Output")
-            st.text(result.stdout)
+            st.subheader("Sentiment Analysis Results")
+            
+            # Parse the sentiment analysis results
+            lines = result.stdout.strip().split('\n')
+            results = []
+            current_column = None
+            current_data = {}
+            
+            # Regular extraction of results from text output
+            for line in lines:
+                if line.startswith("Column:"):
+                    if current_column and current_data:
+                        results.append((current_column, current_data))
+                        current_data = {}
+                    current_column = line.replace("Column:", "").strip()
+                elif "Processed " in line and "entries" in line:
+                    current_data["total"] = int(line.split("Processed ")[1].split(" entries")[0])
+                elif "% were positive" in line:
+                    current_data["positive"] = float(line.split("%")[0].strip())
+                elif "% were negative" in line:
+                    current_data["negative"] = float(line.split("%")[0].strip())
+                elif "average score" in line.lower():
+                    current_data["avg_score"] = float(line.split("was ")[1].strip())
+                elif "weighted average score" in line.lower():
+                    weighted_score = float(line.split("is ")[1].strip())
+            
+            # Add the last column data
+            if current_column and current_data:
+                results.append((current_column, current_data))
+            
+            # Display results in a nice layout
+            if results:
+                tabs = st.tabs([res[0] for res in results] + ["Combined Score"])
+                
+                for i, (column, data) in enumerate(results):
+                    with tabs[i]:
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.metric("Total Entries", f"{data.get('total', 0)}")
+                        with col2:
+                            st.metric("Positive %", f"{data.get('positive', 0):.2f}%")
+                        with col3:
+                            st.metric("Negative %", f"{data.get('negative', 0):.2f}%")
+                        with col4:
+                            st.metric("Average Score", f"{data.get('avg_score', 0):.2f}")
+                
+                # Display the combined weighted average
+                with tabs[-1]:
+                    st.metric("Weighted Average Score", f"{weighted_score:.2f}")
+                    
+                    # Interpret the score
+                    if weighted_score > 0.5:
+                        sentiment = "Very Positive"
+                        color = "green"
+                    elif weighted_score > 0.2:
+                        sentiment = "Positive"
+                        color = "lightgreen"
+                    elif weighted_score > -0.2:
+                        sentiment = "Neutral"
+                        color = "gray"
+                    elif weighted_score > -0.5:
+                        sentiment = "Negative"
+                        color = "orange"
+                    else:
+                        sentiment = "Very Negative"
+                        color = "red"
+                    
+                    st.markdown(f"<h3 style='color: {color}'>Overall Sentiment: {sentiment}</h3>", unsafe_allow_html=True)
+                    
+                    st.info("For a more detailed analysis with charts and customizable weights, please visit the 'Combined Analysis' page.")
+            else:
+                st.warning("Could not parse sentiment analysis results properly.")
+                st.text(result.stdout)
 
         st.sidebar.success("Pipeline execution complete!")
 
