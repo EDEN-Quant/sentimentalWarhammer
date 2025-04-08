@@ -178,6 +178,16 @@ def main():
         # Run sentiment analysis directly
         update_progress(sentiment_progress, 50, 75)
         
+        # Check if we're using the fallback classifier
+        is_using_fallback = False
+        if hasattr(run_sentiment_analysis, "__module__") and run_sentiment_analysis.__module__ == "__main__":
+            is_using_fallback = True
+        elif callable(run_sentiment_analysis) and not hasattr(run_sentiment_analysis, "tokenizer"):
+            is_using_fallback = True
+            
+        if is_using_fallback:
+            st.warning("⚠️ Using simplified sentiment analysis due to HuggingFace connection issues. Results may be less accurate than normal.")
+        
         results = []
         for col in df.columns:
             try:
