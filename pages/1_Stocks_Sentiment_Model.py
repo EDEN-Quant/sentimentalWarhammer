@@ -58,7 +58,7 @@ def aggregate_csv_data(root_dir, output_file, progress_bar):
         return None
 
 def main():
-    st.title("Stock Data Aggregation & Sentiment Analysis")
+    st.title("Stock Data Aggregation & Sentiment Analysis: Pipeline 4")
 
     # Sidebar Inputs
     st.sidebar.title("Pipeline Execution")
@@ -192,9 +192,8 @@ def main():
         )
         update_progress(sentiment_progress, 50, 100)
         
-        if result.stdout:
-            st.subheader("Sentiment Analysis Results")
-            st.text(result.stdout)
+        st.subheader("Sentiment Analysis Results")
+        st.text(result.stdout)
             
             # # # Parse the sentiment analysis results
             # # lines = result.stdout.strip().split('\n')
