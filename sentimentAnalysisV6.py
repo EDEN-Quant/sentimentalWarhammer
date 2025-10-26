@@ -2,8 +2,6 @@ from transformers import pipeline, AutoModelForSequenceClassification, AutoToken
 import pandas as pd
 import chardet
 import os
-import streamlit as st
-import numpy as np
 import warnings
 from transformers.utils.logging import set_verbosity_error
 
