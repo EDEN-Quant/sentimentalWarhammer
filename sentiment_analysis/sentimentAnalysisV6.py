@@ -59,13 +59,8 @@ def main(dataset, colName):
     sentences = sub_df[colName].astype(str).fillna('').tolist()
 
     try:
-        # Apply the sentiment pipeline in batches
-        if callable(sentiment_pipeline):
-            # For our fallback function
-            results = sentiment_pipeline(sentences)
-        else:
-            # For the HuggingFace pipeline
-            results = sentiment_pipeline(sentences)
+        # Run sentiment analysis on target column
+        results = sentiment_pipeline(sentences)
         
         # Assign results back to sub_df
         sub_df['sentiment'] = [r['label'] for r in results]
@@ -103,15 +98,11 @@ def main(dataset, colName):
     return total_count, positive_percentage, negative_percentage, averageScore
 
 if __name__ == "__main__":
-    # --------------------------------------------
     # Detect encoding and read the aggregated_data.csv
-    # --------------------------------------------
     file_path = 'aggregated_data.csv'
     if not os.path.exists(file_path):
         print(f"Error: '{file_path}' not found.")
         exit(1)
-    
-    # Try to detect encoding
     with open(file_path, 'rb') as f:
         result = chardet.detect(f.read(10000))
         encoding = result['encoding']
@@ -119,26 +110,16 @@ if __name__ == "__main__":
     # Read the CSV with the detected encoding, and fallback to common encodings if it fails
     try:
         df = pd.read_csv(file_path, encoding=encoding)
-        # print(f"Successfully read '{file_path}' with encoding '{encoding}'")
-    except Exception as e:
-        # print(f"Error reading '{file_path}' with detected encoding '{encoding}': {e}")
-        # print("Trying with 'utf-8' encoding...")
+    except Exception:
         try:
             df = pd.read_csv(file_path, encoding='utf-8')
-            # print(f"Successfully read '{file_path}' with 'utf-8' encoding")
-        except Exception as e:
-            # print(f"Error reading '{file_path}' with 'utf-8' encoding: {e}")
-            # print("Trying with 'latin1' encoding...")
+        except Exception:
             try:
                 df = pd.read_csv(file_path, encoding='latin1')
-                # print(f"Successfully read '{file_path}' with 'latin1' encoding")
-            except Exception as e:
-                # print(f"Error reading '{file_path}' with 'latin1' encoding: {e}")
+            except Exception:
                 exit(1)
     
-    # --------------------------------------------
     # Read the SEC value from a different CSV file
-    # --------------------------------------------
     sec_file_path = os.path.join('SEC', 'data', 'form4transactions', 'summary', 'summary_data.csv')
     if not os.path.exists(sec_file_path):
         print(f"Error: '{sec_file_path}' not found.")
@@ -146,7 +127,6 @@ if __name__ == "__main__":
     
     try:
         sec_df = pd.read_csv(sec_file_path, encoding=encoding)
-        # print(f"Successfully read '{sec_file_path}' with encoding '{encoding}'")
     except Exception as e:
         print(f"Error reading '{sec_file_path}': {e}")
         exit(1)
@@ -154,9 +134,7 @@ if __name__ == "__main__":
     first_company = sec_df.iloc[0]
     insider_sentiment = first_company['sentiment_score']
     
-    # --------------------------------------------
     # Run main(...) on each column and store results
-    # --------------------------------------------
     results = []
     for col in df.columns:
         try:
@@ -165,9 +143,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Error processing column '{col}': {e}")
     
-    # --------------------------------------------
     # Output the results
-    # --------------------------------------------
     for col, total_count, positive_percentage, negative_percentage, avg_score in results:
         print(
             f"Column: {col}\n"
@@ -177,9 +153,7 @@ if __name__ == "__main__":
             f"The average score (-1 to 1) was {avg_score:.2f}\n"
         )
     
-    # --------------------------------------------
     # Calculate the weighted average for GoogleSearch, YouTube, and SEC
-    # --------------------------------------------
     google_score = next((res[4] for res in results if res[0] == "GoogleSearch"), 0)
     youtube_score = next((res[4] for res in results if res[0] == "YouTube"), 0)
     
