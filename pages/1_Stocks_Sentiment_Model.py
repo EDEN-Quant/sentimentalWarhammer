@@ -6,7 +6,7 @@ import streamlit as st
 import time
 import chardet
 from dotenv import load_dotenv
-from sentimentAnalysisV6 import main as run_sentiment_analysis
+from sentiment_analysis.sentimentAnalysisV6 import main as run_sentiment_analysis
 
 # Add the SEC scripts directory to the system path
 data_processing_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'SEC', 'scripts', 'data_processing'))

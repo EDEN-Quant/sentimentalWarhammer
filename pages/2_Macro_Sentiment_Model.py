@@ -6,7 +6,7 @@ import streamlit as st
 import time
 from dotenv import load_dotenv
 import chardet
-from sentimentAnalysisV6 import main as run_sentiment_analysis
+from sentiment_analysis.sentimentAnalysisV6 import main as run_sentiment_analysis
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 python_interpreter = sys.executable

@@ -4,7 +4,7 @@ import chardet
 import os
 import warnings
 from transformers.utils.logging import set_verbosity_error
-from simple_sentiment_classifier import simple_sentiment_classifier
+from sentiment_analysis.simple_sentiment_classifier import simple_sentiment_classifier
 
 # Reduce warning noise
 set_verbosity_error()
