@@ -10,45 +10,49 @@ from sentiment_analysis.simple_sentiment_classifier import simple_sentiment_clas
 set_verbosity_error()
 warnings.filterwarnings('ignore')
 
-# Initialize the sentiment pipeline with better error handling
-try:
-    # Try to load the model with normal settings
-    sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english", batch_size=32)
-except (OSError, EnvironmentError) as e:
+def select_model():
     try:
-        # If we can't connect to HuggingFace, try to use a local model if it's been cached before
-        print("Connection to HuggingFace failed. Attempting to use cached model...")
-        model_name = "distilbert-base-uncased-finetuned-sst-2-english"
-        
-        # Try to load from cache directly
-        model = AutoModelForSequenceClassification.from_pretrained(
-            model_name, 
-            local_files_only=True,
-            cache_dir=os.path.expanduser("~/.cache/huggingface/")
-        )
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_name, 
-            local_files_only=True,
-            cache_dir=os.path.expanduser("~/.cache/huggingface/")
-        )
-        sentiment_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer, batch_size=32)
-    except Exception:
-        # If no cached model exists, create a very simple fallback classifier
-        print("Cannot access HuggingFace model. Using simple fallback classifier.")
-
-        # Replace the HuggingFace pipeline with our simple classifier
-        sentiment_pipeline = simple_sentiment_classifier
+        # Try to load the model with normal settings
+        sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english", batch_size=32)
+    except (OSError, EnvironmentError):
+        try:
+            # If we can't connect to HuggingFace, try to use a local model if it's been cached before
+            print("Connection to HuggingFace failed. Attempting to use cached model...")
+            model_name = "distilbert-base-uncased-finetuned-sst-2-english"
+            
+            # Try to load from cache directly
+            model = AutoModelForSequenceClassification.from_pretrained(
+                model_name, 
+                local_files_only=True,
+                cache_dir=os.path.expanduser("~/.cache/huggingface/")
+            )
+            tokenizer = AutoTokenizer.from_pretrained(
+                model_name, 
+                local_files_only=True,
+                cache_dir=os.path.expanduser("~/.cache/huggingface/")
+            )
+            sentiment_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer, batch_size=32)
+        except Exception:
+            # Replace the HuggingFace pipeline with our simple classifier
+            print("Cannot access HuggingFace model. Using simple fallback classifier.")
+            sentiment_pipeline = simple_sentiment_classifier
+    
+    return sentiment_pipeline
 
 def main(dataset, colName):
     """
     This function:
+      0) Selects sentiment model
       1) Drops rows where 'colName' is NaN.
       2) Runs sentiment analysis on that column.
       3) Computes statistics (positive%, negative%, averageScore).
       4) Returns counts and averages for that column.
     """
 
-    # Only drop rows missing in the target column (instead of dropping from the entire DataFrame)
+    # Select sentiment model
+    sentiment_pipeline = select_model()
+
+    # Drop rows missing in the target column (instead of dropping from the entire DataFrame)
     sub_df = dataset.dropna(subset=[colName]).copy()
 
     # Convert to a list of strings (fill any leftover NaNs just in case)
