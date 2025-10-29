@@ -22,8 +22,8 @@ def simple_sentiment_classifier(texts:list):
                 label = "POSITIVE"
                 score = 0.55
             else:
-                label = "NEUTRAL"
-                score = 0.5
+                label = "POSITIVE"
+                score = 0.1
         
         results.append({"label": label, "score": score})
     return results
