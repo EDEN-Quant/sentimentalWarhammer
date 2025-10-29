@@ -4,6 +4,7 @@ import chardet
 import os
 import warnings
 from transformers.utils.logging import set_verbosity_error
+from simple_sentiment_classifier import simple_sentiment_classifier
 
 # Reduce warning noise
 set_verbosity_error()
@@ -34,41 +35,8 @@ except (OSError, EnvironmentError) as e:
     except Exception:
         # If no cached model exists, create a very simple fallback classifier
         print("Cannot access HuggingFace model. Using simple fallback classifier.")
-        # Define a very basic sentiment classifier using keyword matching
-        positive_words = set(['good', 'great', 'excellent', 'positive', 'amazing', 'wonderful', 'best', 'love', 'happy', 'recommend'])
-        negative_words = set(['bad', 'terrible', 'awful', 'negative', 'poor', 'worst', 'hate', 'disappointing', 'disappointed', 'avoid'])
-        
-        def simple_sentiment_classifier(texts):
-            if not isinstance(texts, list):
-                texts = [texts]
-                
-            results = []
-            for text in texts:
-                text = text.lower()
-                words = set(text.split())
-                
-                pos_matches = len(words.intersection(positive_words))
-                neg_matches = len(words.intersection(negative_words))
-                
-                if pos_matches > neg_matches:
-                    label = "POSITIVE"
-                    score = 0.5 + min(0.4, (pos_matches * 0.1))
-                elif neg_matches > pos_matches:
-                    label = "NEGATIVE"
-                    score = 0.5 + min(0.4, (neg_matches * 0.1)) 
-                else:
-                    # If counts are equal, slightly favor positive sentiment (optimistic bias)
-                    if pos_matches > 0:
-                        label = "POSITIVE"
-                        score = 0.55
-                    else:
-                        label = "NEUTRAL"
-                        score = 0.5
-                
-                results.append({"label": label, "score": score})
-            return results
-        
-        # This replaces the HuggingFace pipeline with our simple classifier
+
+        # Replace the HuggingFace pipeline with our simple classifier
         sentiment_pipeline = simple_sentiment_classifier
 
 def main(dataset, colName):
