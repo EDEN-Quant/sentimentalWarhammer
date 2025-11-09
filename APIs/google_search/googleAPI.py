@@ -2,22 +2,18 @@ import requests
 import csv
 import os
 import sys
-import streamlit as st
 
-# 🔹 Fetch API Key and CX from environment variables or Streamlit secrets
-GOOGLE_SEARCH_API_KEY = os.environ.get("GOOGLE_SEARCH_API_KEY") or st.secrets["GOOGLE_SEARCH_API_KEY"]
-CX = os.environ.get("CX") or st.secrets["CX"]
+# Fetch API Key and CX from environment variables
+GOOGLE_SEARCH_API_KEY = os.environ.get("GOOGLE_SEARCH_API_KEY")
+CX = os.environ.get("CX")
 BASE_URL = "https://www.googleapis.com/customsearch/v1"
 
-# 🔹 Ensure API Key and CX are available
+# Ensure API Key and CX are available
 if not GOOGLE_SEARCH_API_KEY or not CX:
     raise ValueError("Missing GOOGLE_SEARCH_API_KEY or GOOGLE_CX environment variables.")
 
-# 🔹 Define the correct output path
-if "STREAMLIT_SERVER" in os.environ:  # Detect if running on Streamlit Cloud
-    OUTPUT_PATH = os.path.join("/tmp", "google_search_results.csv")  # Use /tmp/ on Streamlit
-else:
-    OUTPUT_PATH = os.path.join("data", "google_search_csv", "google_search_results.csv")  # Local path
+# Where to write the CSV results
+OUTPUT_PATH = os.path.join("data", "google_search_csv", "google_search_results.csv")
 
 def get_google_search_titles(query, total_results=100):
     """
@@ -63,8 +59,7 @@ def save_titles_to_csv(titles):
     directory = os.path.dirname(OUTPUT_PATH)
 
     # Ensure the output directory exists (only for local use)
-    if "STREAMLIT_SERVER" not in os.environ:
-        os.makedirs(directory, exist_ok=True)
+    os.makedirs(directory, exist_ok=True)
 
     # Save titles to a CSV file
     with open(OUTPUT_PATH, mode="w", newline="", encoding="utf-8") as file:
@@ -88,6 +83,3 @@ if __name__ == "__main__":
     titles = get_google_search_titles(query, total_results=total_results)
     csv_file = save_titles_to_csv(titles)
 
-    # If running on Streamlit, provide a download link
-    if "STREAMLIT_SERVER" in os.environ:
-        print(f"💾 Download available: {csv_file}")
