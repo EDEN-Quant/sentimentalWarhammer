@@ -2,21 +2,17 @@ import requests
 import csv
 import os
 import sys
-import streamlit as st
 
 # 🔹 Fetch API Key from environment variables
-YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY") or st.secrets["YOUTUBE_API_KEY"]
+YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 BASE_URL = "https://www.googleapis.com/youtube/v3/search"
 
 # 🔹 Ensure API Key is available
 if not YOUTUBE_API_KEY:
-    raise ValueError("Missing API_KEY environment variable.")
+    raise ValueError("Missing YOUTUBE_API_KEY environment variable.")
 
 # 🔹 Define the correct output path
-if "STREAMLIT_SERVER" in os.environ:  # Detect if running on Streamlit Cloud
-    OUTPUT_PATH = os.path.join("/tmp", "youtube_titles.csv")  # Use /tmp/ on Streamlit
-else:
-    OUTPUT_PATH = os.path.join("data", "youtube_csv", "youtube_titles.csv")  # Local path
+OUTPUT_PATH = os.path.join("data", "youtube_csv", "youtube_titles.csv")
 
 def get_youtube_titles(query, max_results=50, total_results=500, order="relevance"):
     """
@@ -56,12 +52,12 @@ def save_titles_to_csv(titles):
     """
     Saves the YouTube search results to the correct path based on environment.
     """
+    #Compute the directory from the OUTPUT_PATH
     directory = os.path.dirname(OUTPUT_PATH)
-    
-    # Ensure the output directory exists (only for local use)
-    if "STREAMLIT_SERVER" not in os.environ:
-        os.makedirs(directory, exist_ok=True)
 
+    #Ensure the directory exists
+    os.makedirs(directory, exist_ok=True)
+    
     # Save titles to a CSV file
     with open(OUTPUT_PATH, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
@@ -78,12 +74,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     query = sys.argv[1]
-    total_results = 300  # Default to fetching 5 results
+    total_results = 300  # Default to fetching 300 results
 
     # Fetch YouTube titles and save them to the correct path
     titles = get_youtube_titles(query, total_results=total_results)
     csv_file = save_titles_to_csv(titles)
-
-    # If running on Streamlit, provide a download link
-    if "STREAMLIT_SERVER" in os.environ:
-        print(f"💾 Download available: {csv_file}")
